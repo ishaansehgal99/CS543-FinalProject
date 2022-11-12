@@ -21,7 +21,7 @@ import http.client
 from datetime import datetime as dt
 
 MAX_RETRIES = 2
-NUM_WORKERS = 128
+NUM_WORKERS = 4
 RERUN_FAILED = False
 RERUN_INCOMPLETE_READS = False
 
@@ -59,13 +59,13 @@ def filter_found_unplayable_videos(df_train, ids_file):
 
     return df_train[~df_train['id'].isin(df_unplayable['id'])]
 
-def write_completed(ytid, start, end, num_retries, start_time):
+def write_completed(song_name, ytid, start, end, num_retries, start_time):
     completed = open('completed', 'a')
     total_time = time.time() - start_time
-    log = f"{ytid},{start},{end},{num_retries},{dt.now()},{total_time},{RUN_NUM}\n"
+    log = f"{song_name},{ytid},{start},{end},{num_retries},{dt.now()},{total_time},{RUN_NUM}\n"
     completed.write(log)
 
-def write_download_error(log_error, spurl, start, end, num_retries):
+def write_download_error(log_error, song_name, spurl, start, end, num_retries):
     print("Download Error", spurl)
     reason = 'Unknown'
     if 'Server returned 403 Forbidden (access denied)' in log_error: 
@@ -98,7 +98,7 @@ def write_download_error(log_error, spurl, start, end, num_retries):
         reason = 'Codec not supported'
 
     download_error = open('downloaderrors', 'a')
-    log = spurl + ',' + str(start) + ',' + str(end) + ',' + reason + ',' + str(num_retries) + '\n'
+    log = song_name + ',' + spurl + ',' + str(start) + ',' + str(end) + ',' + reason + ',' + str(num_retries) + '\n'
     download_error.write(log)
 
 def rerunnable(log_error): 
@@ -110,32 +110,34 @@ def rerunnable(log_error):
 
 def process(t):
     if not RERUN_FAILED and not RERUN_INCOMPLETE_READS:
-        spurl, start, end, x, y = t
+        spid, song_name, spurl ,start, end = t
     else: 
         spurl, start, end, error_reason = t
-
+    
+    # start, end = 0, 30
     start_time = time.time()
     # Skipped
-    if os.path.isfile('/home/ubuntu/AV-Speech-Dataset/process_data/output/{}-{}-{}.m4a'.format(spurl, start, end)):
+    if os.path.isfile('/home/ubuntu/AV-Speech-Dataset/process_data/output/{}-{}-{}.mp3'.format(spid, start, end)):
         print("Video Skipped")
-        write_completed(spurl, start, end, np.nan, start_time)
+        write_completed(song_name, spurl, start, end, np.nan, start_time)
         return
 
     cmd = [
         # 'proxychains',
         'spotdl',
+        f'{spurl}',
         '--cookie-file', 'cookies.txt',
         '--ffmpeg', 'ffmpeg', 
-        '--ffmpeg-args', "-y -loglevel error -ss {} -to {} -strict experimental -f m4a -threads 1".format(start, end),
+        '--ffmpeg-args', "-y -loglevel error -ss {} -to {} -strict experimental -f mp3 -threads 1".format(start, end),
         '--bitrate', "128k",
-        '--format', 'm4a' ,
-        '--output', "output/{}-{}-{}.m4a".format(spurl, start, end),
+        '--format', 'mp3' ,
+        '--output', "output/{}-{}-{}.mp3".format(spid, start, end),
     ]
 
     print('CMD', cmd)
 
     # Log this command use fileio
-    log_file = open('logs/{}-{}-{}'.format(spurl, start, end), 'w+')
+    log_file = open('logs/{}-{}-{}'.format(spid, start, end), 'w+')
     log_file.write(str(cmd))
     log_result = ''
     attempt = 0
@@ -153,17 +155,17 @@ def process(t):
             log_file.write(log_result.stdout)
             log_file.write(log_result.stderr)
 
-            output_folder = "/Users/ishaansehgal/Documents/CS543-FinalProject/output"
-            output_file = "/{}-{}-{}.m4a".format(spurl, start, end)
-            if os.path.isfile(output_folder + output_file):
-                write_completed(spurl, start, end, attempt, start_time)
+            output_folder = "./output"
+            output_file = "/{}-{}-{}.mp3".format(spid, start, end)
+            if os.path.exists(output_folder + output_file):
+                write_completed(song_name, spurl, start, end, attempt, start_time)
             else:
                 attempt += 1
                 if attempt < MAX_RETRIES and rerunnable(log_result.stderr):
                     print("Retrying", spurl)
                     continue
                 print(f"All {MAX_RETRIES} retries failed, {spurl}")
-                write_download_error(log_result.stderr, spurl, start, end, attempt)
+                write_download_error(log_result.stderr, song_name, spurl, start, end, attempt)
 
         except Exception as exception:
             print("Process Exception Raised", spurl)
@@ -175,7 +177,7 @@ def process(t):
                 log_file.write("Process Failed")
                 log_file.write(log_result.stdout)
                 log_file.write(log_result.stderr)
-                write_download_error(log_result.stderr, spurl, start, end, attempt)
+                write_download_error(log_result.stderr, song_name, spurl, start, end, attempt)
         else:
             break
 
@@ -187,7 +189,7 @@ def main():
     df_train = None
    
     # Read from training data
-    df_train = pd.read_csv('spotify_train.csv')
+    df_train = pd.read_csv('spotify.csv')
     # Original size
     print('Length of original training set: ', len(df_train))
     # Filter videos unplayable found from past download errors
