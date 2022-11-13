@@ -8,7 +8,7 @@ import subprocess
 import argparse
 
 # Number of files to zip
-# NUM_TO_ZIP = 10000
+# NUM_TO_ZIP = 100
 
 # Upload downloaded zip to s3
 # def upload_to_s3(args): 
@@ -66,15 +66,15 @@ def main(args):
         total_zipped = zipped_last['total_zipped']
 
     # Starting file to ending file in zip (inclusive)
-    id_start = df_to_zip.iloc[total_zipped]['id'][-16:]
-    id_end = df_to_zip.iloc[total_zipped + args.num_to_zip-1]['id'][-16:]
+    id_start = df_to_zip.iloc[total_zipped]['id'][-22:]
+    id_end = df_to_zip.iloc[total_zipped + args.num_to_zip-1]['id'][-22:]
 
     try: 
         zip_file_name = "{}-{}-{}.zip".format(id_start, id_end, args.num_to_zip)
         zip_obj = ZipFile(zip_file_name, 'w')
 
         for index, row in df_to_zip[total_zipped:total_zipped+args.num_to_zip].iterrows(): 
-            file_path = args.data_root + "/{}-{}-{}.m4a".format(row['id'], row['start'], row['end'])
+            file_path = args.data_root + "/{}-{}-{}.mp3".format(row['id'][-22:], row['start'], row['end'])
             # if not exists(file_path):
             #     print("PATH NO EXIST: ", file_path)
             #     continue
@@ -142,7 +142,7 @@ if __name__=="__main__":
     PARSER.add_argument(
         "--num_to_zip",
         help="Number of files to Zip",
-        default=10000,
+        default=100,
         type=int,
     )
 
@@ -150,7 +150,7 @@ if __name__=="__main__":
     main(ARGS)
 
     # Remove m4a files after they have been zipped successfully
-    remove_zipped_files(ARGS)
+    # remove_zipped_files(ARGS)
 
     # Upload downloaded zip to s3
     # upload_to_s3(ARGS)

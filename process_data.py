@@ -21,7 +21,7 @@ import http.client
 from datetime import datetime as dt
 
 MAX_RETRIES = 2
-NUM_WORKERS = 4
+NUM_WORKERS = 2
 RERUN_FAILED = False
 RERUN_INCOMPLETE_READS = False
 
@@ -33,6 +33,7 @@ def filter_completed_videos(df_train, ids_file):
     # Read Video ids
     df_completed = pd.read_csv(ids_file)[['id', 'start', 'end']]
     # Remove Videos from Training Videos
+    df_completed['id'] = df_completed.apply(lambda row: row['id'][-22:], axis=1)
     return pd.concat([df_train, df_completed, df_completed]).drop_duplicates(subset=['id', 'start', 'end'], keep=False)
 
 def filter_unplayable_videos(df_train, ids_file): 
