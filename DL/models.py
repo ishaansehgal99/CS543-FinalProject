@@ -39,8 +39,9 @@ class Generator(nn.Module):
         super().__init__()
 
         self.noise_dim = noise_dim
+        self.LSTM = nn.LSTM(529040, 1000, batch_first=True)
         self.model = nn.Sequential(
-            nn.Linear(noise_dim, 128),
+            nn.Linear(1000, 128),
             nn.ReLU(),
         )
 
@@ -62,6 +63,8 @@ class Generator(nn.Module):
     
     def forward(self, x):
         x = x.view(-1, self.noise_dim)
+        x, _ = self.LSTM(x)
+        
         x = self.model(x)
         x = x.view(-1, 128, 1, 1)
         return self.gen(x)
@@ -69,19 +72,26 @@ class Generator(nn.Module):
 
 def main():
     # g = Generator(529040)
-    # z = torch.rand((2, 40, 6613))
+    z = torch.rand((2, 40, 6613))
     # z = z.flatten()
-    # z = z.unsqueeze(dim = 0)
+    z = z.unsqueeze(dim = 0)
     
     # print(z.size())
     # out = g(z)
     # print(out.size())
-    z = torch.rand((10, 2, 40, 6613))
+    # z = torch.rand((1, 529040))
+    # lstm = nn.LSTM(529040, 1000 , batch_first=True)
+    # ho = torch.zeros((1, 1000))
+    # co = torch.zeros((1, 1000))
+    # o1, h = lstm(z,(ho, co))
+    # print(o1.size())
     
     g = Generator(529040)
     out = g(z)
     print(out.size())
-    print(summary(g, (10, 2, 40, 6613), device="cpu"))
+
+
+    print(summary(g, z, device="cpu"))
 
 
 
