@@ -1,7 +1,6 @@
 import torch
 import torch.nn.functional as F
 import torch.nn as nn
-from torchsummary import summary
 class Discriminator(torch.nn.Module):
     def __init__(self, input_channels=3):
         super(Discriminator, self).__init__()
@@ -64,7 +63,7 @@ class Generator(nn.Module):
     def forward(self, x):
         x = x.view(-1, self.noise_dim)
         x, _ = self.LSTM(x)
-        
+
         x = self.model(x)
         x = x.view(-1, 128, 1, 1)
         return self.gen(x)
@@ -85,13 +84,6 @@ def main():
     # co = torch.zeros((1, 1000))
     # o1, h = lstm(z,(ho, co))
     # print(o1.size())
-    
-    g = Generator(529040)
-    out = g(z)
-    print(out.size())
-
-
-    print(summary(g, z, device="cpu"))
 
 
 

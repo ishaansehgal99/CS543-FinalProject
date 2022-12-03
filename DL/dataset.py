@@ -11,7 +11,7 @@ import numpy as np
 
 
 
-class DataLoader(Dataset):
+class SpotifyData(Dataset):
     def __init__(self, soundsPath, imagesPath):
         super().__init__()
         self.images = []
@@ -33,11 +33,13 @@ class DataLoader(Dataset):
             audio = mfccTrans(audio)
             if audio.size() != dim_wanted.size():
                 continue
-            self.sounds.append(audio)
+            
             image = Image.open(imagesPath + "/" + imageName + ".jpeg")
+            self.sounds.append(audio)
             image = np.array(image)
             image = trans(image)
             self.images.append(image)
+        print(len(self.images))
         print("Loaded Sounds & Images")
 
 
@@ -50,7 +52,7 @@ class DataLoader(Dataset):
 
 
 def main():
-    data = DataLoader("./spotify_data/song_clips", "./spotify_data/album_covers")
+    data = SpotifyData("./spotify_data/song_clips", "./spotify_data/album_covers")
     print(len(data))
 
 
