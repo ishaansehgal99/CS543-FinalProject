@@ -37,6 +37,7 @@ class SpotifyData(Dataset):
             audio = audioTrans(audio)
             if audio.size() != dim_wanted.size():
                 continue
+            audio = audio.view(-1, 25840)
 
             image = Image.open(imagesPath + "/" + imageName + ".jpeg")
             self.sounds.append(audio)
