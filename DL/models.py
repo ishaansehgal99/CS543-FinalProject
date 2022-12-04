@@ -38,7 +38,7 @@ class Generator(nn.Module):
         super().__init__()
 
         self.noise_dim = noise_dim
-        self.LSTM = nn.LSTM(529040, 1000, batch_first=True)
+        self.LSTM = nn.LSTM(25840, 1000, batch_first=True)
         self.model = nn.Sequential(
             nn.Linear(1000, 128),
             nn.ReLU(),

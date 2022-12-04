@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 
 class GAN():
     def __init__(self, device, lr, batch_size = 8):
-        self.G = Generator(529040).to(device)
+        self.G = Generator(25840).to(device)
         self.D = Discriminator().to(device)
         self.device = device
         self.batch_size = batch_size
@@ -20,7 +20,7 @@ class GAN():
         self.optimG = torch.optim.Adam(self.G.parameters(), lr)
         self.optimD = torch.optim.Adam(self.D.parameters(), lr)
 
-        self.dataset = SpotifyData("./spotify_data/song_clips", "./spotify_data/album_covers")
+        self.dataset = SpotifyData("./spotify_data/song_wavs", "./spotify_data/album_covers")
         self.dataloader = DataLoader(self.dataset, batch_size=batch_size, shuffle=True, num_workers=2)
     
 

@@ -1,9 +1,8 @@
 import torch
 from torch.utils.data.dataloader import Dataset
-import torchaudio
+import librosa
 from os import listdir
 from os.path import isfile, join
-import random
 from torchvision.transforms import transforms
 from PIL import Image
 import numpy as np
@@ -23,17 +22,22 @@ class SpotifyData(Dataset):
         soundFiles = [soundsPath + "/" + f for f in listdir(soundsPath) if isfile(join(soundsPath, f))]
         soundsWithoutF = [f for f in listdir(soundsPath) if isfile(join(soundsPath, f))]
         trans = transforms.Compose([transforms.ToTensor(), transforms.Resize(64)])
-        dim_wanted = torch.empty((2, 40, 6613))
-
+        audioTrans = transforms.Compose([transforms.ToTensor()])
+        dim_wanted = torch.empty((1, 20, 1292))
+        MAX = 1000
         for i in range(len(soundFiles)):
+            if i - 1 == MAX:
+                break
+
             sound = soundsWithoutF[i]
             imageName = sound.split(".")[0]
-            audio, sample_rate = torchaudio.load(soundFiles[i])
-            mfccTrans = torchaudio.transforms.MFCC(sample_rate)
-            audio = mfccTrans(audio)
+            data, sr = librosa.load(soundFiles[i])
+            audio = librosa.feature.mfcc(y = data, sr = sr)
+            # print(audio.shape)
+            audio = audioTrans(audio)
             if audio.size() != dim_wanted.size():
                 continue
-            
+
             image = Image.open(imagesPath + "/" + imageName + ".jpeg")
             self.sounds.append(audio)
             image = np.array(image)
@@ -52,7 +56,7 @@ class SpotifyData(Dataset):
 
 
 def main():
-    data = SpotifyData("./spotify_data/song_clips", "./spotify_data/album_covers")
+    data = SpotifyData("./spotify_data/song_wavs", "./spotify_data/album_covers")
     print(len(data))
 
 
