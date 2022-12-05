@@ -7,6 +7,7 @@ from torch.utils.data import DataLoader
 import tqdm
 from torchvision.utils import make_grid
 import matplotlib.pyplot as plt
+from album_data import *
 
 
 
@@ -20,7 +21,7 @@ class GAN():
         self.optimG = torch.optim.Adam(self.G.parameters(), lr)
         self.optimD = torch.optim.Adam(self.D.parameters(), lr)
 
-        self.dataset = SpotifyData("./spotify_data/song_wavs", "./spotify_data/album_covers", False)
+        self.dataset = AlbumData("./spotify_data/archive/album_covers_512")
         self.dataloader = DataLoader(self.dataset, batch_size=batch_size, shuffle=True, num_workers=2)
     
 
