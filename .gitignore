@@ -1,3 +1,4 @@
 DL/spotify_data
 DL/__*
 *.pth
+*_checkpoints

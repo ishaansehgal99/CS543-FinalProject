@@ -38,14 +38,9 @@ class Generator(nn.Module):
         super().__init__()
 
         self.noise_dim = noise_dim
-        self.LSTM = nn.LSTM(25840, 1000, batch_first=True)
-        self.model = nn.Sequential(
-            nn.Linear(1000, 128),
-            nn.ReLU(),
-        )
-
+    
         self.gen = nn.Sequential(
-            nn.ConvTranspose2d(128, 1024, 4, 1, padding=0),
+            nn.ConvTranspose2d(self.noise_dim, 1024, 4, 1, padding=0),
             nn.BatchNorm2d(1024),
             nn.ReLU(),
             nn.ConvTranspose2d(1024, 512, 4, 2, padding=1),
@@ -61,11 +56,7 @@ class Generator(nn.Module):
         )
     
     def forward(self, x):
-        x = x.view(-1, self.noise_dim)
-        x, _ = self.LSTM(x)
-
-        x = self.model(x)
-        x = x.view(-1, 128, 1, 1)
+        x = x.view(-1, self.noise_dim, 1, 1)
         return self.gen(x)
     
 
