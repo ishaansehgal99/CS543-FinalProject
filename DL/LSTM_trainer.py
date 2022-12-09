@@ -1,7 +1,7 @@
 import torch
 import numpy as np
 from models import *
-from LSTM import LSTM
+from LSTM import LSTM_Model
 from models import *
 import torch.nn as nn
 from dataset import *
@@ -12,12 +12,12 @@ import matplotlib.pyplot as plt
 from album_data import *
 
 class LSTM_trainer():
-    def __init__(self, device, lr, batch_size = 8):
-        self.LSTM = LSTM_MODEL(128).to(device)
+    def __init__(self, device, lr, state_dict, batch_size = 8):
+        self.LSTM = LSTM_Model(128,state_dict).to(device)
         self.device = device
         self.batch_size = batch_size
-        self.optimL = torch.optim.Adam(self.LSTM_MODEL.lstm.parameters(),lr)
-        self.dataset = SpotifyData("./spotify_data/","./spotify_data/archive/album_covers_512",True)
+        self.optimL = torch.optim.Adam(self.LSTM.lstm.parameters(),lr)
+        self.dataset = SpotifyData("./spotify_data/song_wavs","./spotify_data/archive/album_covers_512",True)
         self.dataloader = DataLoader(self.dataset, batch_size=batch_size, shuffle=True, num_workers=2)
         
     def train(self, num_epochs):
