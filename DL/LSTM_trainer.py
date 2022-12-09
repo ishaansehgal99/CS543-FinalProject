@@ -17,7 +17,7 @@ class LSTM_trainer():
         self.device = device
         self.batch_size = batch_size
         self.optimL = torch.optim.Adam(self.LSTM.lstm.parameters(),lr)
-        self.dataset = SpotifyData("./spotify_data/song_wavs","./spotify_data/archive/album_covers_512",True)
+        self.dataset = SpotifyData("./spotify_data/song_wavs","./spotify_data/album_covers",True)
         self.dataloader = DataLoader(self.dataset, batch_size=batch_size, shuffle=True, num_workers=2)
         
     def train(self, num_epochs):

@@ -10,11 +10,13 @@ class LSTM_Model(torch.nn.Module):
         super().__init__()
         self.Generator = Generator(noise_dim)
         self.Generator.load_state_dict(torch.load(state_dict))
+        self.noise_dim = noise_dim
         self.lstm = nn.LSTM(529040, noise_dim, batch_first=True)
         
     def forward(self, x):
         x = x.view(-1, self.noise_dim)
-        x, _ = self.LSTM(x)
+        x.unsqueeze(-1)
+        x, _ = self.lstm(x)
 
         img = self.Generator(x)
         return img
