@@ -26,7 +26,7 @@ class AlbumData(Dataset):
         return len(self.images)
     
     def __getitem__(self, index):
-        trans = transforms.Compose([transforms.ToTensor(), transforms.Resize((64, 64))])
+        trans = transforms.Compose([transforms.ToTensor(), transforms.Resize((64, 64)), transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
         image = Image.open(self.images[index])
         image = trans(image)
         return image

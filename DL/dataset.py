@@ -22,7 +22,7 @@ class SpotifyData(Dataset):
     def loadData(self, soundsPath, imagesPath):
         soundFiles = [soundsPath + "/" + f for f in listdir(soundsPath) if isfile(join(soundsPath, f))]
         soundsWithoutF = [f for f in listdir(soundsPath) if isfile(join(soundsPath, f))]
-        trans = transforms.Compose([transforms.ToTensor(), transforms.Resize((64, 64))])
+        trans = transforms.Compose([transforms.ToTensor(), transforms.Resize((64, 64)), transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
         audioTrans = transforms.Compose([transforms.ToTensor()])
         dim_wanted = torch.empty((1, 20, 1292))
         MAX = 10000
